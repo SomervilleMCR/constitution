@@ -1,7 +1,19 @@
 import os
 import subprocess
+import sys
 
-# First, check that latexdiff is installed
+if len(sys.argv) != 2:
+    quit('Generate latexdiff of previous constitutional version.  Usage: ' + sys.argv[0] + '(integer)')
+
+try:
+    num_revisions_back = int(sys.argv[1])
+except ValueError as num_revisions_back:
+    quit('Expected an integer to be passed, instead got ' + str(num_revisions_back))
+
+if num_revisions_back < 0:
+    quit('Expected positive integer to be passed, instead got ' + str(num_revisions_back))
+
+# Check that latexdiff is installed
 try:
     subprocess.call(['latexdiff', '--version'], stdout=open(os.devnull, 'w'))
 except OSError as e:
@@ -25,3 +37,12 @@ for line in log_contents:
         list_of_hashes.append(line.replace('commit ', '').strip())
 
 print(list_of_hashes)
+
+if num_revisions_back > len(list_of_hashes) - 1:
+    num_revisions_back = len(list_of_hashes) - 1
+    print('Too many revisions back: giving you diff with first version instead')
+
+# Generate old file contents
+with open(constitution_old, 'w') as f:
+    subprocess.call(['git', 'show', list_of_hashes[num_revisions_back] + ':' + constitution_tex], stdout=f)
+
