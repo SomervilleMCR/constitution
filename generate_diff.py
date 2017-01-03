@@ -55,7 +55,16 @@ subprocess.call(['pdflatex', constitution_dif])
 subprocess.call(['pdflatex', constitution_dif])
 subprocess.call(['pdflatex', constitution_dif])
 
-# Tidy up
+# Tidy up our generated files
 subprocess.call(['rm', constitution_old, constitution_dif, log_file])
 
+# Check that a valid pdf was created by pdflatex
+if not os.path.isfile(constitution_dif.replace('.tex', '.pdf')):
+    quit('pdf of diff not created as expected: check latex log file...')
+
+if os.path.getsize(constitution_dif.replace('.tex', '.pdf')) < 1024:
+    quit('pdf of diff not created as expected: check latex log file...')
+
+# Tidy up pdflatex generated files
+subprocess.call(['rm', constitution_dif.replace('.tex', '.aux'), constitution_dif.replace('.tex', '.log')])
 
