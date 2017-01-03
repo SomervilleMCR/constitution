@@ -52,6 +52,8 @@ with open(constitution_dif, 'w') as f:
     subprocess.call(['latexdiff', constitution_old, constitution_tex], stdout=f)
 
 subprocess.call(['pdflatex', constitution_dif])
+subprocess.call(['pdflatex', constitution_dif])
+subprocess.call(['pdflatex', constitution_dif])
 
 # Tidy up
 subprocess.call(['rm', constitution_old, constitution_dif, log_file])
