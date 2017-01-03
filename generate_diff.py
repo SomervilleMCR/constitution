@@ -3,7 +3,7 @@ import subprocess
 import sys
 
 if len(sys.argv) != 2:
-    quit('Generate latexdiff of previous constitutional version.  Usage: ' + sys.argv[0] + '(integer)')
+    quit('Generate latexdiff of previous constitutional version.  Usage: ' + sys.argv[0] + ' (integer)')
 
 try:
     num_revisions_back = int(sys.argv[1])
@@ -21,6 +21,7 @@ except OSError as e:
 
 constitution_tex = 'mcr_constitution.tex'
 constitution_old = 'mcr_constitution.OLD'
+constitution_dif = 'mcr_constitution.diff.tex'
 log_file = 'log'
 
 if not os.path.isfile(constitution_tex):
@@ -45,4 +46,9 @@ if num_revisions_back > len(list_of_hashes) - 1:
 # Generate old file contents
 with open(constitution_old, 'w') as f:
     subprocess.call(['git', 'show', list_of_hashes[num_revisions_back] + ':' + constitution_tex], stdout=f)
+
+# Generate diff tex file
+with open(constitution_dif, 'w') as f:
+    subprocess.call(['latexdiff', constitution_old, constitution_tex], stdout=f)
+
 
