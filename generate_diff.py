@@ -13,9 +13,11 @@ except ValueError as num_revisions_back:
 if num_revisions_back < 0:
     quit('Expected positive integer to be passed, instead got ' + str(num_revisions_back))
 
+null_output_file = 'null_output'
+
 # Check that latexdiff is installed
 try:
-    subprocess.call(['latexdiff', '--version'], stdout=open(os.devnull, 'w'))
+    subprocess.call(['latexdiff', '--version'], stdout=open(null_output_file, 'w'))
 except OSError as e:
     quit('latexdiff does not seem to be installed: try sudo apt-get install latexdiff')
 
@@ -51,12 +53,16 @@ with open(constitution_old, 'w') as f:
 with open(constitution_dif, 'w') as f:
     subprocess.call(['latexdiff', constitution_old, constitution_tex], stdout=f)
 
-subprocess.call(['pdflatex', constitution_dif])
-subprocess.call(['pdflatex', constitution_dif])
-subprocess.call(['pdflatex', constitution_dif])
+# If pdf already exists, delete it first
+if os.path.isfile(constitution_dif.replace('.tex', '.pdf')):
+    subprocess.call(['rm', constitution_dif.replace('.tex', '.pdf')])
+
+subprocess.call(['pdflatex', constitution_dif], stdout=open(null_output_file, 'w'))
+subprocess.call(['pdflatex', constitution_dif], stdout=open(null_output_file, 'w'))
+subprocess.call(['pdflatex', constitution_dif], stdout=open(null_output_file, 'w'))
 
 # Tidy up our generated files
-subprocess.call(['rm', constitution_old, constitution_dif, log_file])
+subprocess.call(['rm', constitution_old, constitution_dif, log_file, null_output_file])
 
 # Check that a valid pdf was created by pdflatex
 if not os.path.isfile(constitution_dif.replace('.tex', '.pdf')):
