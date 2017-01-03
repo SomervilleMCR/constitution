@@ -21,7 +21,7 @@ except OSError as e:
 
 constitution_tex = 'mcr_constitution.tex'
 constitution_old = 'mcr_constitution.OLD'
-constitution_dif = 'mcr_constitution.diff.tex'
+constitution_dif = 'mcr_constitution_diff.tex'
 log_file = 'log'
 
 if not os.path.isfile(constitution_tex):
@@ -50,5 +50,10 @@ with open(constitution_old, 'w') as f:
 # Generate diff tex file
 with open(constitution_dif, 'w') as f:
     subprocess.call(['latexdiff', constitution_old, constitution_tex], stdout=f)
+
+subprocess.call(['pdflatex', constitution_dif])
+
+# Tidy up
+subprocess.call(['rm', constitution_old, constitution_dif, log_file])
 
 
