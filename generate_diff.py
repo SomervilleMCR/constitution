@@ -17,7 +17,7 @@ null_output_file = 'null_output'
 
 # Check that latexdiff is installed
 try:
-    subprocess.call(['latexdiff', '--version'], stdout=open(null_output_file, 'w'))
+    subprocess.call(['latexdiff'], stdout=open(null_output_file, 'w'))
 except OSError as e:
     quit('latexdiff does not seem to be installed: try sudo apt-get install latexdiff')
 
@@ -30,6 +30,7 @@ if not os.path.isfile(constitution_tex):
     quit('Did not find ' + constitution_tex)
 
 # Generate log of revisions to constitution_tex
+print('Generating list of revisions that changed ' + constitution_tex + '...')
 with open(log_file, 'w') as f:
     subprocess.call(['git', 'log', '--follow', constitution_tex], stdout=f)
 
@@ -39,17 +40,17 @@ for line in log_contents:
     if line.startswith('commit'):
         list_of_hashes.append(line.replace('commit ', '').strip())
 
-print(list_of_hashes)
-
 if num_revisions_back > len(list_of_hashes) - 1:
     num_revisions_back = len(list_of_hashes) - 1
     print('Too many revisions back: giving you diff with first version instead')
 
 # Generate old file contents
+print('Getting revision ' + str(num_revisions_back) + ' back from git repo...')
 with open(constitution_old, 'w') as f:
     subprocess.call(['git', 'show', list_of_hashes[num_revisions_back] + ':' + constitution_tex], stdout=f)
 
 # Generate diff tex file
+print('Generating latex diff file...')
 with open(constitution_dif, 'w') as f:
     subprocess.call(['latexdiff', constitution_old, constitution_tex], stdout=f)
 
@@ -57,12 +58,10 @@ with open(constitution_dif, 'w') as f:
 if os.path.isfile(constitution_dif.replace('.tex', '.pdf')):
     subprocess.call(['rm', constitution_dif.replace('.tex', '.pdf')])
 
+print('Generating pdf diff...')
 subprocess.call(['pdflatex', constitution_dif], stdout=open(null_output_file, 'w'))
 subprocess.call(['pdflatex', constitution_dif], stdout=open(null_output_file, 'w'))
 subprocess.call(['pdflatex', constitution_dif], stdout=open(null_output_file, 'w'))
-
-# Tidy up our generated files
-subprocess.call(['rm', constitution_old, constitution_dif, log_file, null_output_file])
 
 # Check that a valid pdf was created by pdflatex
 if not os.path.isfile(constitution_dif.replace('.tex', '.pdf')):
@@ -71,6 +70,11 @@ if not os.path.isfile(constitution_dif.replace('.tex', '.pdf')):
 if os.path.getsize(constitution_dif.replace('.tex', '.pdf')) < 1024:
     quit('pdf of diff not created as expected: check latex log file...')
 
+# Tidy up our generated files
+print('Tidying up...')
+subprocess.call(['rm', constitution_old, constitution_dif, log_file, null_output_file])
+
 # Tidy up pdflatex generated files
 subprocess.call(['rm', constitution_dif.replace('.tex', '.aux'), constitution_dif.replace('.tex', '.log')])
 
+print('    ... finished.')
