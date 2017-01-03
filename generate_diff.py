@@ -18,7 +18,10 @@ if not os.path.isfile(constitution_tex):
 with open(log_file, 'w') as f:
     subprocess.call(['git', 'log', '--follow', constitution_tex], stdout=f)
 
+log_contents = open(log_file, 'r').readlines()
+list_of_hashes = []
+for line in log_contents:
+    if line.startswith('commit'):
+        list_of_hashes.append(line.replace('commit ', '').strip())
 
-
-
-
+print(list_of_hashes)
